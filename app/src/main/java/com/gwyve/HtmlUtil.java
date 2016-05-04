@@ -5,14 +5,12 @@ package com.gwyve;
  */
 public class HtmlUtil {
     public static  String addUploadHtml(String uri){
-        String uploadHtml = "<br><form action='";
+        String uploadHtml = "<form action=\"";
         uploadHtml += uri;
-        uploadHtml += "' method=\"post\" enctype=\"multipart/form-data\" name=\"form1\" id=\"form1\">\n" +
-                "<b>Upload file  </b>\n" +
-                "<br><hr>\n" +
-                "<input type=\"file\" name=\"file\" id=\"file\">\n" +
-                "<input type=\"submit\" name=\"button\" id=\"button\" value=\"Submit\"><hr>\n" +
-                "</form>";
+        uploadHtml += "\" enctype=\"multipart/form-data\" method=\"post\">\n" +
+                "      File: <input type=\"file\" name=\"datafile\" size=\"40\"><br>\n" +
+                "    <input type=\"submit\">\n" +
+                "   </form>";
         return  uploadHtml;
     }
 }

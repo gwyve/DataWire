@@ -327,6 +327,7 @@ public class MiniServer implements Runnable {
                     }
 //					for(int i = 0; i < size ;i++)
 //						os.write(fileBuf[i]);
+                    Log.e("111",new String(fileBuf));
                     os.write(fileBuf, 0, (int)size);
                     os.close();
                 }
@@ -374,6 +375,7 @@ public class MiniServer implements Runnable {
                     }
 //					for(int i =0; i<size;i++)
 //						os.write(fileBuf[i]);
+                    Log.e("111",new String(fileBuf));
                     os.write(fileBuf,0,(int)size);
                     os.close();
                 }
