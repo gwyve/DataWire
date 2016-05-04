@@ -239,7 +239,6 @@ public class MiniServer implements Runnable {
                 Properties header = new Properties();
                 if(client!=null)
                 {
-                    Log.e("111","nifewwwwwwwwwww");
                     InputStream is = client.getInputStream();
                     if(is == null)
                         return;
@@ -264,7 +263,6 @@ public class MiniServer implements Runnable {
                         uploadFile(buf, hrlen, splitbyte, dirFile.getAbsolutePath(), is, parms);
                     }
                     Response r = serveFile(parms.getProperty("uri"), header, rootDir, true);
-                    Log.e("111",""+rootDir);
                     if ( r == null )
                         sendError( HTTP_INTERNALERROR, "SERVER INTERNAL ERROR: Serve() returned a null response." );
                     else
@@ -296,7 +294,6 @@ public class MiniServer implements Runnable {
             if(fileBeginbyte>0){
                 findBodyInfo(beginBuf, parms);
                 File outFile = new File(dirPath +"/"+ parms.getProperty("filename"));
-                Log.e("111",outFile.getAbsolutePath());
                 if(outFile.exists())
                     outFile.delete();
                 outFile.createNewFile();
@@ -327,7 +324,6 @@ public class MiniServer implements Runnable {
                     }
 //					for(int i = 0; i < size ;i++)
 //						os.write(fileBuf[i]);
-                    Log.e("111",new String(fileBuf));
                     os.write(fileBuf, 0, (int)size);
                     os.close();
                 }
@@ -375,7 +371,6 @@ public class MiniServer implements Runnable {
                     }
 //					for(int i =0; i<size;i++)
 //						os.write(fileBuf[i]);
-                    Log.e("111",new String(fileBuf));
                     os.write(fileBuf,0,(int)size);
                     os.close();
                 }
@@ -434,7 +429,6 @@ public class MiniServer implements Runnable {
                 parms.put("host", str.substring(str.indexOf(" ")+1, str.length()));
             }else if(str.indexOf("Content-Length")!=-1 && str.indexOf(" ") != -1){
                 parms.put("content-length", str.substring(str.indexOf(" ")+1,str.length()));
-                Log.e("111",parms.getProperty("content-length"));
             }
             if(str != null && str.trim().length() > 0){
                 int p = str.indexOf( ':' );
