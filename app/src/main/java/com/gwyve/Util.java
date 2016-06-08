@@ -2,6 +2,7 @@ package com.gwyve;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -23,7 +24,7 @@ public class Util {
         boolean flag = false;
         InetAddress theAddress = InetAddress.getByName(host);
         try {
-            Socket socket = new Socket(theAddress,port);
+            ServerSocket testPort = new ServerSocket(port);
             flag = true;
         } catch (IOException e) {
 

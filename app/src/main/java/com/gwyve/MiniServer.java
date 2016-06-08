@@ -1,6 +1,10 @@
 package com.gwyve;
 
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -15,6 +19,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -27,7 +32,12 @@ import java.util.TimeZone;
  * Created by Administrator on 2016/5/3.
  */
 public class MiniServer implements Runnable {
-    public int port;
+
+    public String ip;
+
+    public int port = 8080;
+
+    public Handler textViewHandler = null;
 
     public static int fileBufferSize = 1024;
 
@@ -146,7 +156,7 @@ public class MiniServer implements Runnable {
      */
     private void sendError( String status, String msg ) throws InterruptedException
     {
-        sendResponse( status, MIME_PLAINTEXT, null, new ByteArrayInputStream( msg.getBytes()));
+        sendResponse(status, MIME_PLAINTEXT, null, new ByteArrayInputStream(msg.getBytes()));
         throw new InterruptedException();
     }
 
@@ -207,16 +217,36 @@ public class MiniServer implements Runnable {
         }
     }
 
-    public MiniServer(File root,int port){
-        rootDir = root;
-        this.port = port;
-        try {
-            serverSocket = new ServerSocket(port);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
 
+    private static MiniServer myServer = null;
+
+    public static MiniServer singletonMiniServer(File root,String ip,Handler handler){
+        if (myServer == null){
+            myServer = new MiniServer(root,ip,handler);
+        }
+            Message msg = new Message();
+            Bundle bundle = new Bundle();
+            bundle.putString("textView","Please put \""+myServer.ip+":"+myServer.port+"\" as path address in the browser!" );
+            msg.setData(bundle);
+            handler.sendMessage(msg);
+        return myServer;
+    }
+
+    public MiniServer(File root,String ip,Handler handler){
+        this.rootDir = root;
+        this.ip = ip;
+        this.textViewHandler = handler;
+
+
+        boolean flag = true;
+        while(flag){
+            try {
+                serverSocket = new ServerSocket(this.port);
+                flag = false;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void stop(){
@@ -398,6 +428,7 @@ public class MiniServer implements Runnable {
         String string = new String(buf);
         String[] strArr = string.split("\r\n");
         for(String str : strArr){
+            Log.e("111",str);
             if(str.indexOf("filename")!=-1){
                 parms.put("filename", str.substring(str.indexOf("filename")+10, str.length()-1));
             }
@@ -510,7 +541,11 @@ public class MiniServer implements Runnable {
                 else if ( allowDirectoryListing && f.canRead() )
                 {
                     String[] files = f.list();
-                    String msg = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'></head><body><h1>Directory " + uri + "</h1><br/>";
+                    String msg = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'>" +
+                            HtmlUtil.addJavaScript() +
+                            "</head><body><h1>Directory " + uri + "</h1><br/>"+
+                            "<p id='uploading' style='display:none'></p>"+
+                            "<p id='uploaded'  style='display:none'>uploaded files list</p>";
 
                     if ( uri.length() > 1 )
                     {

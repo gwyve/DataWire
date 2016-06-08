@@ -5,8 +5,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -19,18 +19,24 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.gwyve.MiniServer;
-import com.gwyve.Util;
 
-import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    private MiniServer miniServer = null;
+    private Thread miniServerThread = null;
     private TextView textView;
     private Button startBtn ;
     private Button stopBtn;
     private ProgressBar progressBar;
 
-    private int port;
+    public Handler textViewHandler = new Handler(){
+        public void handleMessage(Message msg){
+            textView.setText(msg.getData().getString("textView"));
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +53,10 @@ public class MainActivity extends AppCompatActivity {
         stopBtn = (Button) findViewById(R.id.stopBtn);
         progressBar =(ProgressBar) findViewById(R.id.progressBar);
 
+
+        stopBtn.setClickable(false);
+        startBtn.setClickable(true);
+
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,29 +64,40 @@ public class MainActivity extends AppCompatActivity {
                 WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
                 //判断wifi是否开启
                 if (!wifiManager.isWifiEnabled()) {
-                    wifiManager.setWifiEnabled(true);
+                    textView.setText("Please open WIFI!!!");
+                    return;
                 }
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                 int ipAddress = wifiInfo.getIpAddress();
                 String ip = intToIp(ipAddress);
 
-                port = 8080;
-                try {
-                    while (Util.isPortUsing("127.0.0.1",port)) {
-                        port++;
+                if (miniServerThread==null){
+                    miniServer = MiniServer.singletonMiniServer(Environment.getExternalStorageDirectory(), ip, textViewHandler);
+                    miniServerThread = new Thread(miniServer);
+                    miniServerThread.setDaemon(true);
+                    miniServerThread.start();
+                }else{
+                    if(!miniServerThread.isAlive()){
+                        miniServerThread.start();
                     }
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    textView.setText("Please put \""+miniServer.ip+":"+miniServer.port+"\" as path address in the browser!");
                 }
-
-                textView.setText("please input "+ip+":"+port);
-//                Log.e("111",""+Environment.getRootDirectory());
-                MiniServer miniServer = new MiniServer(Environment.getExternalStorageDirectory(),port);
-                Thread thread = new Thread(miniServer);
-                thread.setDaemon(true);
-                thread.start();
+                stopBtn.setClickable(true);
+                startBtn.setClickable(false);
             }
         });
+
+        stopBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                miniServerThread.stop();
+                textView.setText("Stopped!!");
+                stopBtn.setClickable(false);
+                startBtn.setClickable(true);
+            }
+        });
+
+
 
     }
 
