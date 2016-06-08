@@ -39,7 +39,7 @@ public class MiniServer implements Runnable {
 
     public Handler textViewHandler = null;
 
-    public static int fileBufferSize = 1024;
+    public static int fileBufferSize = 8096;
 
     private File rootDir;
 
@@ -543,10 +543,8 @@ public class MiniServer implements Runnable {
                     String[] files = f.list();
                     String msg = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'>" +
                             HtmlUtil.addJavaScript() +
-                            "</head><body><h1>Directory " + uri + "</h1><br/>"+
-                            "<p id='uploading' style='display:none'></p>"+
-                            "<p id='uploaded'  style='display:none'>uploaded files list</p>";
-
+                            "</head><body><h1>Directory " + uri + "</h1><br/>" +
+                            HtmlUtil.addUploadHtml(uri);
                     if ( uri.length() > 1 )
                     {
                         String u = uri.substring( 0, uri.length()-1 );
@@ -588,7 +586,6 @@ public class MiniServer implements Runnable {
                             if ( dir ) msg += "</b>";
                         }
                     }
-                    msg += HtmlUtil.addUploadHtml(uri);
                     msg += "</body></html>";
                     res = new Response( HTTP_OK, MIME_HTML, msg );
                 }
